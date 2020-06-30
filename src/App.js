@@ -1,73 +1,71 @@
 import React, { Component, useEffect, useState } from 'react';
+import MiComponent from './components/MiComponent';
 
-const Company = ({ name, catchPhrase }) => {
-  useEffect(() => {
-    return () => console.log(`company ${name}  will unmount`);
-  }, []);
+class App extends Component {
+  state = {
+    nombre: '',
+    foto: '',
+    paises: [
+      { id: '5r6t7y8u', nombre: 'peru', foto: '5r6t7y8' },
+      { id: '8yh8', nombre: 'veracruz', foto: '5r6t7y8' }
+    ]
+  };
+  removeItem = (id) => {
+    if (window.confirm(`seguro que quieres borrar ${id}`)) {
+      this.setState((prevState) => {
+        return {
+          paises: prevState.paises.filter((pais) => pais.id !== id)
+        };
+      });
+    }
+  };
 
-  return (
-    <div style={{ border: '1px solid rgba(0,0,0,.2)', borderRadius: 10 }}>
-      Company : {name}
-      location : ioinon
-      <p>{catchPhrase}</p>
-    </div>
-  );
-};
+  editItem = (id, item) => {
+    const paisessinItem = this.state.paises.filter((pais) => pais.id !== id);
 
-class Usuario extends Component {
-  state = { showCompany: true };
+    this.setState((prevState) => {
+      return {
+        paises: [...paisessinItem, item]
+      };
+    });
+  };
+
+  handleChange = (evento) => {
+    this.setState({ [evento.target.name]: evento.target.value });
+  };
+  handleSubmit = () => {
+    if (this.state.foto !== '' && this.state.nombre !== '') {
+      this.setState(({ nombre, foto, paises }) => ({
+        nombre: '',
+        foto: '',
+        paises: [...paises, { id: nombre, nombre, foto }]
+      }));
+    } else {
+      alert('completa los campos');
+    }
+  };
+
   render() {
-    const { name, email, company } = this.props.user;
+    const { nombre, foto, paises } = this.state;
     return (
-      <div
-        style={{ fontWeight: 10, width: '%33vw', borderRadius: 5, border: '1px solid blue', margin: 10, padding: 10 }}
-      >
+      <>
         <button
           onClick={() => {
-            this.setState((prevState) => ({ showCompany: !prevState.showCompany }));
+            this.removeItem('ecuador');
           }}
         >
-          {this.state.showCompany ? 'Hide Company' : 'show Company'}
+          Borrar
         </button>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span>{name}</span>
-          <span>{email}</span>
-        </div>
-        {this.state.showCompany && <Company {...company} />}
-      </div>
+        <input name="nombre" value={nombre} onChange={this.handleChange} />
+        <input name="foto" value={foto} onChange={this.handleChange} />
+        <button onClick={this.handleSubmit}>Agregar</button>
+        <hr />
+        {paises.map((pais) => (
+          <MiComponent editItem={this.editItem} pais={pais} key={pais.id} removeItem={this.removeItem} />
+        ))}
+      </>
     );
   }
 }
 
-const Demo = () => {
-  const [users, setUsers] = useState([]);
-
-  useEffect(() => {
-    fetch('https://jsonplaceholder.typicode.com/users')
-      .then((response) => response.json())
-      .then((usersData) => {
-        setUsers(usersData);
-      });
-  }, []);
-
-  return (
-    <>
-      <button
-        onClick={() => {
-          setUsers((ps) => {
-            return ps.filter((item) => item.id !== 1);
-          });
-        }}
-      >
-        delete
-      </button>
-      <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-        {users.map((user) => (
-          <Usuario user={user} key={user.name} />
-        ))}
-      </div>
-    </>
-  );
-};
-
-export default Demo;
+export default App;
